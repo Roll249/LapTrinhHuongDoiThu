@@ -27,13 +27,97 @@ public class LibraryManagementApp extends JFrame {
         // Tải dữ liệu từ file CSV
         danhSachSach = DataLoader.loadSachFromCSV("sach.csv");
         danhSachDocGia = DataLoader.loadDocGiaFromCSV("docgia.csv");
-        danhSachMuonTra =DataLoader.loadMuonTraFromCSV("muontra.csv");
-
+        danhSachMuonTra = DataLoader.loadMuonTraFromCSV("muontra.csv", danhSachSach, danhSachDocGia);
         hienThiDanhSachSach();
         hienThiDanhSachDocGia();
         hienThiDanhSachMuonTra();
+        muonTraPanel();
 
         createMenu();
+    }
+    
+   
+    private void muonTraPanel() {
+        JPanel muonTraPanel = new JPanel(new GridLayout(2, 1));
+
+        // Panel for borrowing books
+        JPanel muonPanel = new JPanel(new GridLayout(5, 2));
+        JTextField maDocGiaMuonField = new JTextField();
+        JTextField maSachMuonField = new JTextField();
+        JTextField soLuongMuonField = new JTextField();
+        JTextField soNgayMuonField = new JTextField();
+
+        muonPanel.add(new JLabel("      Mã độc giả:"));
+        muonPanel.add(maDocGiaMuonField);
+        muonPanel.add(new JLabel("      Mã sách:"));
+        muonPanel.add(maSachMuonField);
+        muonPanel.add(new JLabel("      Số lượng mượn:"));
+        muonPanel.add(soLuongMuonField);
+        muonPanel.add(new JLabel("      Số ngày mượn:"));
+        muonPanel.add(soNgayMuonField);
+
+        JButton muonButton = new JButton("Mượn");
+        muonButton.addActionListener(e -> {
+            String maDocGia = maDocGiaMuonField.getText();
+            String maSach = maSachMuonField.getText();
+            int soLuong = Integer.parseInt(soLuongMuonField.getText());
+            int soNgay = Integer.parseInt(soNgayMuonField.getText());
+
+            Sach sach = danhSachSach.stream().filter(s -> s.getMaSach().equals(maSach)).findFirst().orElse(null);
+            DocGia docGia = danhSachDocGia.stream().filter(dg -> dg.getMaDocGia().equals(maDocGia)).findFirst().orElse(null);
+
+            if (sach != null && docGia != null && sach.getSoLuong() >= soLuong) {
+                double phiPhat =0;
+                MuonTra muonTra = new MuonTra(sach, docGia, LocalDate.now(), LocalDate.now().plusDays(soNgay),soLuong,phiPhat);
+                muonTra.setSoLuong(soLuong);
+                danhSachMuonTra.add(muonTra);
+                sach.setSoLuong(sach.getSoLuong() - soLuong);
+                luuSachCSV();
+                hienThiDanhSachMuonTra();
+            } else {
+                JOptionPane.showMessageDialog(this, "Thông tin không hợp lệ hoặc sách không đủ số lượng!");
+            }
+        });
+
+        muonPanel.add(new JLabel());
+        muonPanel.add(muonButton);
+
+        // Panel for returning books
+        JPanel traPanel = new JPanel(new GridLayout(3, 2));
+        JTextField maDocGiaTraField = new JTextField();
+        JTextField maSachTraField = new JTextField();
+
+        traPanel.add(new JLabel("      Mã độc giả:"));
+        traPanel.add(maDocGiaTraField);
+        traPanel.add(new JLabel("      Mã sách:"));
+        traPanel.add(maSachTraField);
+
+        JButton traButton = new JButton("Trả");
+        traButton.addActionListener(e -> {
+            String maDocGia = maDocGiaTraField.getText();
+            String maSach = maSachTraField.getText();
+
+            MuonTra muonTra = danhSachMuonTra.stream()
+                    .filter(mt -> mt.getDocGia().getMaDocGia().equals(maDocGia) && mt.getSach().getMaSach().equals(maSach) && !mt.isDaTra())
+                    .findFirst().orElse(null);
+
+            if (muonTra != null) {
+                muonTra.setNgayTra(LocalDate.now());
+                muonTra.getSach().setSoLuong(muonTra.getSach().getSoLuong() + muonTra.getSoLuong());
+                luuSachCSV();
+                hienThiDanhSachMuonTra();
+            } else {
+                JOptionPane.showMessageDialog(this, "Thông tin không hợp lệ hoặc sách chưa được mượn!");
+            }
+        });
+
+        traPanel.add(new JLabel());
+        traPanel.add(traButton);
+
+        muonTraPanel.add(muonPanel);
+        muonTraPanel.add(traPanel);
+
+        mainPanel.add(muonTraPanel, "MuonVaTraSach");
     }
 
     private void hienThiDanhSachSach() {
@@ -108,8 +192,12 @@ public class LibraryManagementApp extends JFrame {
         JMenuItem hienThiDocGiaItem = new JMenuItem("Hiển thị danh sách độc giả");
         hienThiDocGiaItem.addActionListener(e -> switchToPanel("DanhSachDocGia"));
 
+        JMenuItem muonVaTraSachItem = new JMenuItem("Mượn và Trả");
+        muonVaTraSachItem.addActionListener(e -> switchToPanel("MuonVaTraSach"));
+
         JMenuItem hienThiMuonTraItem = new JMenuItem("Hiển thị danh sách mượn trả");
         hienThiMuonTraItem.addActionListener(e -> hienThiDanhSachMuonTra());
+
 
         JMenuItem baoCaoItem = new JMenuItem("Hiển thị báo cáo");
         baoCaoItem.addActionListener(e -> hienThiBaoCao());
@@ -124,6 +212,7 @@ public class LibraryManagementApp extends JFrame {
         menu.add(baoCaoItem);
         menu.add(luuBaoCaoItem);
         menu.add(hienThiMuonTraItem);
+        menu.add(muonVaTraSachItem);
 
         menuBar.add(menu);
         setJMenuBar(menuBar);
@@ -252,4 +341,4 @@ public class LibraryManagementApp extends JFrame {
         SwingUtilities.invokeLater(() -> new LibraryManagementApp().setVisible(true));
 
     }
-}
+} 

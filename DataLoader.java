@@ -2,8 +2,6 @@ import java.io.*;
 import java.util.*;
 import java.time.LocalDate;
 
-import static java.time.LocalDate.parse;
-
 public class DataLoader {
     // Đọc danh sách sách từ file CSV
     public static List<Sach> loadSachFromCSV(String fileName) {
@@ -48,57 +46,39 @@ public class DataLoader {
         return docGiaList;
     }
 
-    public static List<MuonTra> loadMuonTraFromCSV(String filePath) {
-        List<MuonTra> muonTraList = new ArrayList<>();
-        List<Sach> sachList = loadSachFromCSV("sach.csv");
-        List<DocGia> docGiaList = loadDocGiaFromCSV("docgia.csv");
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+    public static List<MuonTra> loadMuonTraFromCSV(String filePath, List<Sach> danhSachSach, List<DocGia> danhSachDocGia) {
+        List<MuonTra> danhSachMuonTra = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while ((line = br.readLine()) != null) {
-                String[] fields = line.split(",");
-                if (fields.length == 7) {
-                    String maSach = fields[0];
-                    String maDocGia = fields[1];
-                    LocalDate ngayMuon = parse(fields[2]);
-                    LocalDate ngayDuKienTra = parse(fields[3]);
-                    int soLuong = Integer.parseInt(fields[4]);
-                    LocalDate ngayTra = parse(fields[5]);
-                    double phiPhat = Double.parseDouble(fields[6]);
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split(",");
 
-                    Sach sach = findSachByMa(maSach, sachList);
-                    DocGia docGia = findDocGiaByMa(maDocGia, docGiaList);
-                    if (sach != null && docGia != null) {
-                        MuonTra muonTra = new MuonTra(sach, docGia, ngayMuon, ngayDuKienTra, soLuong, ngayTra, phiPhat);
-                        muonTraList.add(muonTra);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+                // Đọc các thuộc tính từ CSV
+                String maSach = values[0];
+                String maDocGia = values[1];
+                LocalDate ngayMuon = LocalDate.parse(values[2]);
+                LocalDate ngayDuKienTra = LocalDate.parse(values[3]);
+                LocalDate ngayTra = values[4].isEmpty() ? null : LocalDate.parse(values[4]);
+                int soLuong = Integer.parseInt(values[5]);
+                double phiPhat = Double.parseDouble(values[6]);
 
-        }
-        return muonTraList;
-    }
 
-    public static void saveMuonTraToCSV(String fileName, List<MuonTra> muonTraList) {
-        try (FileWriter writer = new FileWriter(fileName)) {
-            for (MuonTra muonTra : muonTraList) {
-                writer.write(muonTra.toCSV() + "\n");
+                // Lấy đối tượng Sach và DocGia từ danh sách đã tải
+                Sach sach = findSachByMa(maSach, danhSachSach);
+                DocGia docGia = findDocGiaByMa(maDocGia, danhSachDocGia);
+
+                // Tạo đối tượng MuonTra và cập nhật thông tin trả
+                MuonTra muonTra = new MuonTra(sach, docGia, ngayMuon, ngayDuKienTra,soLuong,phiPhat);
+                muonTra.setPhiPhat(phiPhat);
+                danhSachMuonTra.add(muonTra);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return danhSachMuonTra;
     }
-    
-    public static DocGia timDocGiaTheoMa(String maDocGia, List<DocGia> danhSachDocGia) {
-        for (DocGia docGia : danhSachDocGia) {
-            if (docGia.getMaDocGia().equals(maDocGia)) {
-                return docGia;
-            }
-        }
-        return null;  // Trả về null nếu không tìm thấy
-    }
-    
 
     // Tìm kiếm sách theo mã
     private static Sach findSachByMa(String maSach, List<Sach> danhSachSach) {
@@ -110,4 +90,4 @@ public class DataLoader {
         return danhSachDocGia.stream().filter(d -> d.getMaDocGia().equals(maDocGia)).findFirst().orElse(null);
     }
 
-    }
+}

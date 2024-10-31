@@ -7,55 +7,20 @@ public class MuonTra {
     private LocalDate ngayMuon;
     private LocalDate ngayDuKienTra;
     private LocalDate ngayTra;
-    private int soLuong;
-
     private double phiPhat;
+    private boolean daTra;
+    int soLuong;
 
-    public void setSach(Sach sach) {
-        this.sach = sach;
-    }
-
-    public void setDocGia(DocGia docGia) {
-        this.docGia = docGia;
-    }
-
-    public void setNgayMuon(LocalDate ngayMuon) {
-        this.ngayMuon = ngayMuon;
-    }
-
-    public void setNgayDuKienTra(LocalDate ngayDuKienTra) {
-        this.ngayDuKienTra = ngayDuKienTra;
-    }
-
-    public int getSoLuong() {
-        return soLuong;
-    }
-
-    public void setSoLuong(int soLuong) {
-        this.soLuong = soLuong;
-    }
-
-    public MuonTra(Sach sach, DocGia docGia, LocalDate ngayMuon, LocalDate ngayDuKienTra, int soLuong, LocalDate ngayTra, double phiPhat) {
+    public MuonTra(Sach sach, DocGia docGia, LocalDate ngayMuon, LocalDate ngayDuKienTra,int soLuong,double phiPhat) {
         this.sach = sach;
         this.docGia = docGia;
         this.ngayMuon = ngayMuon;
         this.ngayDuKienTra = ngayDuKienTra;
+        this.daTra = false; // mặc định chưa trả
         this.soLuong = soLuong;
-        this.ngayTra = ngayTra;
         this.phiPhat = phiPhat;
     }
 
-    // Constructor
-    public MuonTra(Sach sach, DocGia docGia, LocalDate ngayMuon, LocalDate ngayDuKienTra) {
-        this.sach = sach;
-        this.docGia = docGia;
-        this.ngayMuon = ngayMuon;
-        this.ngayDuKienTra = ngayDuKienTra;
-        this.ngayTra = null;
-        this.phiPhat = 0.0;
-    }
-
-    // Getters and Setters
     public Sach getSach() {
         return sach;
     }
@@ -76,49 +41,34 @@ public class MuonTra {
         return ngayTra;
     }
 
-    public void setNgayTra(LocalDate ngayTra) {
-        this.ngayTra = ngayTra;
-        tinhPhiPhat();  // Cập nhật phí phạt khi sách được trả
-    }
-
     public double getPhiPhat() {
         return phiPhat;
     }
 
-    public void setPhiPhat(double phiPhat) {
-        this.phiPhat = phiPhat;
-    }
-
     public boolean isDaTra() {
-        return ngayTra != null;
+        return daTra;
     }
 
-    // Tính phí phạt khi quá hạn
-    private void tinhPhiPhat() {
-        if (ngayTra != null && ngayTra.isAfter(ngayDuKienTra)) {
+    public int getSoLuong() {
+        return soLuong;
+    }
+
+    public void setSoLuong(int soLuong) {
+        this.soLuong = soLuong;
+    }
+
+    public void setNgayTra(LocalDate ngayTra) {
+        this.ngayTra = ngayTra;
+        this.daTra = true;
+        if (ngayTra.isAfter(ngayDuKienTra)) {
             long daysLate = ChronoUnit.DAYS.between(ngayDuKienTra, ngayTra);
-            phiPhat = daysLate * 5000;
+            this.phiPhat = daysLate * 5000; // tính phí phạt
         } else {
-            phiPhat = 0.0;
+            this.phiPhat = 0;
         }
     }
-    public void muonSach(DocGia docGia, LocalDate ngayMuon, LocalDate ngayDuKienTra) {
-        this.docGia = docGia;
-        this.ngayMuon = ngayMuon;
-        this.ngayDuKienTra = ngayDuKienTra;
-        this.ngayTra = null;  // Cập nhật trạng thái chưa trả
-        tinhPhiPhat();
-    }
 
-
-    // Phương thức chuyển đổi sang CSV
-    public String toCSV() {
-        return sach.getMaSach() + "," +
-                docGia.getMaDocGia() + "," +
-                ngayMuon + "," +
-                ngayDuKienTra + "," +
-                (ngayTra != null ? ngayTra : "") + "," +
-                phiPhat + "," +
-                (isDaTra() ? "Đã trả" : "Chưa trả");
+    public void setPhiPhat(double phiPhat) {
+        this.phiPhat = phiPhat;
     }
 }
