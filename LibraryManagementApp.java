@@ -71,9 +71,12 @@ public class LibraryManagementApp extends JFrame {
                 MuonTra muonTra = new MuonTra(sach, docGia, LocalDate.now(), LocalDate.now().plusDays(soNgay),soLuong,phiPhat);
                 muonTra.setSoLuong(soLuong);
                 danhSachMuonTra.add(muonTra);
+                luuMuontraCSV();
+                hienThiDanhSachMuonTra();
                 sach.setSoLuong(sach.getSoLuong() - soLuong);
                 luuSachCSV();
                 hienThiDanhSachMuonTra();
+
             } else {
                 JOptionPane.showMessageDialog(this, "Thông tin không hợp lệ hoặc sách không đủ số lượng!");
             }
@@ -104,6 +107,8 @@ public class LibraryManagementApp extends JFrame {
             if (muonTra != null) {
                 muonTra.setNgayTra(LocalDate.now());
                 muonTra.getSach().setSoLuong(muonTra.getSach().getSoLuong() + muonTra.getSoLuong());
+                luuMuontraCSV();
+                hienThiDanhSachMuonTra(); 
                 luuSachCSV();
                 hienThiDanhSachMuonTra();
             } else {
@@ -175,7 +180,16 @@ public class LibraryManagementApp extends JFrame {
             JOptionPane.showMessageDialog(this, "Lỗi khi lưu dữ liệu độc giả!");
         }
     }
-
+   
+    private void luuMuontraCSV() {
+        try (FileWriter writer = new FileWriter("muontra.csv")) {
+            for (MuonTra muonTra : danhSachMuonTra) {
+                writer.write(muonTra.toCSV() + "\n");
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi lưu dữ liệu mượn trả!");
+        }
+    }
     private void createMenu() {
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Tùy chọn");

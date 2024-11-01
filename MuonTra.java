@@ -71,4 +71,7 @@ public class MuonTra {
     public void setPhiPhat(double phiPhat) {
         this.phiPhat = phiPhat;
     }
+    public String toCSV() {
+        return sach.getMaSach() + "," + docGia.getMaDocGia() + "," + ngayMuon + "," + ngayDuKienTra + "," + ngayTra + "," + phiPhat + "," + soLuong;
+    }
 }
