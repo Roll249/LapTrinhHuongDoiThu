@@ -31,6 +31,7 @@ public class LibraryManagementApp extends JFrame {
         hienThiDanhSachSach();
         hienThiDanhSachDocGia();
         hienThiDanhSachMuonTra();
+        searchPanel();
         muonTraPanel();
 
         createMenu();
@@ -211,6 +212,9 @@ public class LibraryManagementApp extends JFrame {
 
         JMenuItem hienThiMuonTraItem = new JMenuItem("Hiển thị danh sách mượn trả");
         hienThiMuonTraItem.addActionListener(e -> hienThiDanhSachMuonTra());
+       
+        JMenuItem searchItem = new JMenuItem("Tìm kiếm");
+        searchItem.addActionListener(e -> switchToPanel("SearchPanel"));
 
 
         JMenuItem baoCaoItem = new JMenuItem("Hiển thị báo cáo");
@@ -226,6 +230,7 @@ public class LibraryManagementApp extends JFrame {
         menu.add(baoCaoItem);
         menu.add(luuBaoCaoItem);
         menu.add(hienThiMuonTraItem);
+        menu.add(searchItem);
         menu.add(muonVaTraSachItem);
 
         menuBar.add(menu);
@@ -323,7 +328,94 @@ public class LibraryManagementApp extends JFrame {
         switchToPanel("DanhSachMuonTra");
     }
 
+    private void searchPanel() {
+        JPanel searchPanel = new JPanel(new GridLayout(2, 1));
 
+        // Panel for searching books
+        JPanel searchBookPanel = new JPanel(new GridLayout(2, 2));
+        JTextField searchBookField = new JTextField();
+        searchBookPanel.add(new JLabel("Tìm kiếm sách:"));
+        searchBookPanel.add(searchBookField);
+
+        JButton searchBookButton = new JButton("Tìm kiếm");
+        searchBookButton.addActionListener(e -> {
+            String keyword = searchBookField.getText().toLowerCase();
+            List<Sach> result = new ArrayList<>();
+            for (Sach sach : danhSachSach) {
+                if (sach.getTenSach().toLowerCase().contains(keyword) || sach.getTacGia().toLowerCase().contains(keyword)) {
+                    result.add(sach);
+                }
+            }
+            hienThiKetQuaTimKiemSach(result);
+        });
+
+        searchBookPanel.add(new JLabel());
+        searchBookPanel.add(searchBookButton);
+
+        // Panel for searching readers
+        JPanel searchReaderPanel = new JPanel(new GridLayout(2, 2));
+        JTextField searchReaderField = new JTextField();
+        searchReaderPanel.add(new JLabel("Tìm kiếm độc giả:"));
+        searchReaderPanel.add(searchReaderField);
+
+        JButton searchReaderButton = new JButton("Tìm kiếm");
+        searchReaderButton.addActionListener(e -> {
+            String keyword = searchReaderField.getText().toLowerCase();
+            List<DocGia> result = new ArrayList<>();
+            for (DocGia docGia : danhSachDocGia) {
+                if (docGia.getTenDocGia().toLowerCase().contains(keyword)) {
+                    result.add(docGia);
+                }
+            }
+            hienThiKetQuaTimKiemDocGia(result);
+        });
+
+        searchReaderPanel.add(new JLabel());
+        searchReaderPanel.add(searchReaderButton);
+
+        searchPanel.add(searchBookPanel);
+        searchPanel.add(searchReaderPanel);
+
+        mainPanel.add(searchPanel, "SearchPanel");
+    }
+
+    private void hienThiKetQuaTimKiemSach(List<Sach> result) {
+        String[] columnNames = { "Mã sách", "Tên sách", "Tác giả", "Thể loại", "Số lượng" };
+        Object[][] data = new Object[result.size()][5];
+
+        for (int i = 0; i < result.size(); i++) {
+            Sach sach = result.get(i);
+            data[i][0] = sach.getMaSach();
+            data[i][1] = sach.getTenSach();
+            data[i][2] = sach.getTacGia();
+            data[i][3] = sach.getTheLoai();
+            data[i][4] = sach.getSoLuong();
+        }
+
+        JTable searchResultTable = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(searchResultTable);
+        mainPanel.add(scrollPane, "SearchResultSach");
+        switchToPanel("SearchResultSach");
+    }
+
+    private void hienThiKetQuaTimKiemDocGia(List<DocGia> result) {
+        String[] columnNames = { "Mã độc giả", "Tên độc giả", "Số điện thoại", "Địa chỉ" };
+        Object[][] data = new Object[result.size()][4];
+
+        for (int i = 0; i < result.size(); i++) {
+            DocGia docGia = result.get(i);
+            data[i][0] = docGia.getMaDocGia();
+            data[i][1] = docGia.getTenDocGia();
+            data[i][2] = docGia.getSoDienThoai();
+            data[i][3] = docGia.getDiaChi();
+        }
+
+        JTable searchResultTable = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(searchResultTable);
+        mainPanel.add(scrollPane, "SearchResultDocGia");
+        switchToPanel("SearchResultDocGia");
+    }
+   
     private void hienThiBaoCao() {
         int tongSoSach = danhSachSach.size();
         long soSachDangMuon = danhSachMuonTra.stream().filter(muonTra -> muonTra.getNgayTra() == null).count();
