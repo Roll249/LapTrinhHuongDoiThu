@@ -1,3 +1,3 @@
-Tổng số sách: 12
-Số sách đang mượn: 1
+Tổng số sách: 15
+Số sách đang mượn: 0
 Tổng phí phạt: 0.0 VND

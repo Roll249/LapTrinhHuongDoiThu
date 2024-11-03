@@ -415,6 +415,10 @@ public class LibraryManagementApp extends JFrame {
         mainPanel.add(scrollPane, "SearchResultDocGia");
         switchToPanel("SearchResultDocGia");
     }
+
+
+
+
    
     private void hienThiBaoCao() {
         int tongSoSach = danhSachSach.size();
