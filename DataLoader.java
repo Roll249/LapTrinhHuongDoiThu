@@ -59,7 +59,7 @@ public class DataLoader {
                 String maDocGia = values[1];
                 LocalDate ngayMuon = LocalDate.parse(values[2]);
                 LocalDate ngayDuKienTra = LocalDate.parse(values[3]);
-                LocalDate ngayTra = values[4].isEmpty() ? null : LocalDate.parse(values[4]);
+                LocalDate ngayTra = (values[4].equals("null")) ? null : LocalDate.parse(values[4]);
                 int soLuong = Integer.parseInt(values[5]);
                 double phiPhat = Double.parseDouble(values[6]);
 
@@ -70,7 +70,7 @@ public class DataLoader {
 
                 // Tạo đối tượng MuonTra và cập nhật thông tin trả
                 MuonTra muonTra = new MuonTra(sach, docGia, ngayMuon, ngayDuKienTra,soLuong,phiPhat);
-                muonTra.setPhiPhat(phiPhat);
+                muonTra.setNgayTra(ngayTra);
                 danhSachMuonTra.add(muonTra);
             }
         } catch (IOException e) {
