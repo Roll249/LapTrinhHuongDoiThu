@@ -59,6 +59,9 @@ public class MuonTra {
 
     public void setNgayTra(LocalDate ngayTra) {
         this.ngayTra = ngayTra;
+        if (ngayTra == null) {
+            this.daTra = false;
+        } else {
         this.daTra = true;
         if (ngayTra.isAfter(ngayDuKienTra)) {
             long daysLate = ChronoUnit.DAYS.between(ngayDuKienTra, ngayTra);
@@ -66,12 +69,13 @@ public class MuonTra {
         } else {
             this.phiPhat = 0;
         }
+        }
     }
 
     public void setPhiPhat(double phiPhat) {
         this.phiPhat = phiPhat;
     }
     public String toCSV() {
-        return sach.getMaSach() + "," + docGia.getMaDocGia() + "," + ngayMuon + "," + ngayDuKienTra + "," + ngayTra + "," + phiPhat + "," + soLuong;
+        return sach.getMaSach() + "," + docGia.getMaDocGia() + "," + ngayMuon + "," + ngayDuKienTra + "," + ngayTra + "," + soLuong + "," + phiPhat;
     }
 }
